@@ -1,0 +1,615 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 10px;
+    background: #f0f2f5;
+    color: #333;
+    line-height: 1.4;
+    font-size: 14px;
+}
+
+.canvas-container {
+    width: 100%;
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 30px 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
+    min-height: 400px;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+h1 {
+    color: #4a6bdf;
+    text-align: center;
+    margin: 0 0 15px 0;
+    font-size: 24px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.controls {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.effect-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 12px 0;
+    width: 100%;
+    max-width: 1000px;
+}
+
+.effect-group {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 0;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.effect-options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+    width: 100%;
+}
+
+.effect-option {
+    display: flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    user-select: none;
+}
+
+.effect-option:hover {
+    background-color: #e9ecef;
+}
+
+.effect-option input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+.effect-group h3 {
+    grid-column: 1 / -1;
+    margin: 0 0 8px 0;
+    padding: 0 0 8px 0;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 14px;
+    color: #4b5563;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.effect-group:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+}
+
+.effect-group h3 {
+    margin: 0 0 6px 0;
+    font-size: 13px;
+    color: #4b5563;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 4px 6px;
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    background: #f8f9fa;
+    z-index: 1;
+}
+
+.effect-options label {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    margin: 4px;
+    padding: 5px 12px 5px 32px;
+    cursor: pointer;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+    font-size: 13px;
+    background: #fff;
+    border: 1px solid #e0e4ff;
+    color: #4a6bdf;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.effect-options label:hover {
+    background: #f0f2ff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(74, 107, 223, 0.2);
+}
+
+.effect-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 12px 0;
+}
+
+.effect-options .effect-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    flex: 1;
+    min-width: 200px;
+}
+
+.effect-options .effect-group h3 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    color: #495057;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.effect-options .checkbox-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+    padding: 14px 16px 14px 50px;
+    margin: 0;
+    min-height: 48px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* 悬停和选中状态 */
+.effect-options .checkbox-container:hover {
+    background: #f8f9ff;
+    border-color: #d1d5ff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.effect-options .checkbox-container input:checked ~ .checkmark {
+    background-color: #4a6bdf;
+    border-color: #4a6bdf;
+}
+
+.effect-options .checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.effect-options .checkbox-container input:checked ~ label {
+    color: #4a6bdf;
+    font-weight: 500;
+}
+
+/* 标签样式 */
+.effect-options .checkbox-container label {
+    margin: 0;
+    padding: 0;
+    font-size: 15px;
+    color: #374151;
+    transition: color 0.2s ease;
+    pointer-events: none; /* 防止点击标签触发两次 */
+}
+.effect-options .checkbox-container:hover {
+    background-color: rgba(74, 107, 223, 0.05);
+}
+
+.effect-options .checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    margin: 0;
+    z-index: 1;
+}
+
+.checkmark {
+    position: absolute;
+    top: 50%;
+    left: 16px;
+    transform: translateY(-50%);
+    height: 22px;
+    width: 22px;
+    background-color: #fff;
+    border: 2px solid #d1d5db;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    z-index: 0;
+}
+
+.effect-options .checkbox-container:hover .checkmark {
+    border-color: #9ca3af;
+    transform: translateY(-50%) scale(1.05);
+}
+
+.effect-options .checkbox-container input:checked ~ .checkmark {
+    background-color: #4a6bdf;
+    border-color: #4a6bdf;
+    animation: checkmark-pulse 0.3s ease-out;
+}
+
+@keyframes checkmark-pulse {
+    0% { transform: translateY(-50%) scale(1); }
+    50% { transform: translateY(-50%) scale(1.1); }
+    100% { transform: translateY(-50%) scale(1); }
+}
+
+/* 勾选标记 */
+.checkmark:after {
+    content: "";
+    position: relative;
+    display: none;
+    width: 12px;
+    height: 6px;
+    border: solid white;
+    border-width: 0 0 3px 3px;
+    transform: rotate(-45deg) translate(1px, -1px);
+    transition: all 0.2s ease;
+    margin-top: -3px;
+}
+
+/* 显示勾选标记 */
+.checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+    animation: checkmark-fade 0.2s ease-out;
+}
+
+@keyframes checkmark-fade {
+    from { opacity: 0; transform: rotate(45deg) scale(0.8); }
+    to { opacity: 1; transform: rotate(45deg) scale(1); }
+}
+
+/* 标签文本样式 */
+.checkbox-container label {
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    font-size: 14px;
+    color: #374151;
+    line-height: 1.5;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+/* 选中时标签文字颜色 */
+.checkbox-container input:checked ~ label {
+    color: #1f2937;
+}
+
+/* 禁用状态 */
+.checkbox-container input:disabled ~ .checkmark {
+    background-color: #f3f4f6;
+    border-color: #d1d5db;
+    cursor: not-allowed;
+}
+
+.checkbox-container input:disabled ~ label {
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* 选中状态的勾选标记动画 */
+.checkbox-container input:checked ~ .checkmark:after {
+    animation: checkmark-bounce 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+@keyframes checkmark-bounce {
+    0% { transform: rotate(45deg) scale(0); }
+    50% { transform: rotate(45deg) scale(1.2); }
+    100% { transform: rotate(45deg) scale(1); }
+}
+
+/* 不同效果标签的颜色 */
+.effect-options label[for*="wave"] { --color: #4a6bdf; }
+.effect-options label[for*="bounce"] { --color: #ff6b6b; }
+.effect-options label[for*="rainbow"] { --color: #ff9f43; }
+.effect-options label[for*="typewriter"] { --color: #10ac84; }
+.effect-options label[for*="glow"] { --color: #5f27cd; }
+.effect-options label[for*="blur"] { --color: #00d2d3; }
+.effect-options label[for*="outline"] { --color: #01a3a4; }
+.effect-options label[for*="gradient"] { --color: #ee5253; }
+.effect-options label[for*="shadow"] { --color: #576574; }
+.effect-options label[for*="glitch"] { --color: #5f27cd; }
+.effect-options label[for*="neon"] { --color: #0abde3; }
+
+.effect-options label {
+    border-color: var(--color, #e0e4ff);
+    color: var(--color, #4a6bdf);
+}
+
+.effect-options label:hover {
+    background: color-mix(in srgb, var(--color, #4a6bdf) 10%, white);
+}
+
+.effect-options label::before {
+    border-color: var(--color, #4a6bdf);
+}
+
+.effect-options input[type="checkbox"]:checked + label {
+    background: color-mix(in srgb, var(--color, #4a6bdf) 15%, white);
+    border-color: var(--color, #4a6bdf);
+}
+
+.effect-options input[type="checkbox"]:checked + label::before {
+    background: var(--color, #4a6bdf);
+    border-color: var(--color, #4a6bdf);
+}
+
+.effect-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.speed-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.speed-control input[type="range"] {
+    width: 150px;
+}
+
+input, select, button {
+    padding: 0.6rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+button {
+    background: #4a6bdf;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: #3a5bcf;
+}
+
+/* 控制项容器 */
+.entrance-controls {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 15px;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 8px 15px;
+    margin: 10px 0;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: thin;
+}
+
+.entrance-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    padding: 4px 0;
+}
+
+.entrance-option label {
+    font-size: 13px;
+    color: #495057;
+    white-space: nowrap;
+}
+
+.entrance-option select,
+.entrance-option input[type="range"] {
+    padding: 5px 8px;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+    background: white;
+    font-size: 13px;
+    height: 30px;
+}
+
+.entrance-option select {
+    min-width: 120px;
+}
+
+#durationValue, #speedValue {
+    display: inline-block;
+    min-width: 30px;
+    text-align: right;
+    font-size: 13px;
+    color: #495057;
+}
+
+/* 应用按钮样式 */
+#applyEffect, #saveBtn {
+    padding: 8px 16px;
+    font-size: 14px;
+    background-color: #4a6bdf;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn.recording {
+    background-color: #e74c3c;
+}
+
+.recording-controls {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.blink {
+    animation: blink 1.5s infinite;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+#applyEffect:hover, #saveBtn:hover {
+    background-color: #3a5bd9;
+    transform: translateY(-1px);
+}
+
+#applyEffect:active, #saveBtn:active {
+    transform: translateY(0);
+}
+
+#saveBtn, #recordBtn {
+    background-color: #10b981;
+    margin-left: 10px;
+}
+
+#saveBtn:hover, #recordBtn:hover {
+    background-color: #0d9f6e;
+}
+
+#recordBtn.recording {
+    background-color: #ef4444;
+}
+
+#recordBtn.recording:hover {
+    background-color: #dc2626;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+.blink {
+    animation: blink 1.5s infinite;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+/* 响应式调整 */
+@media (max-width: 900px) {
+    .container {
+        padding: 12px;
+    }
+    
+    .effect-options {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 8px;
+    }
+    
+    .effect-group {
+        padding: 8px 10px;
+    }
+    
+    #textInput {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+    
+    .effect-options label {
+        padding: 4px 10px 4px 28px;
+        font-size: 12px;
+        margin: 3px;
+    }
+    
+    .effect-options label::before {
+        left: 8px;
+        width: 12px;
+        height: 12px;
+    }
+    
+    .effect-options input[type="checkbox"]:checked + label::after {
+        left: 12px;
+        font-size: 9px;
+    }
+}
+
+/* 在小屏幕上调整控制栏 */
+@media (max-width: 768px) {
+    .entrance-controls {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 8px 10px;
+    }
+    
+    .entrance-option {
+        min-width: calc(50% - 10px);
+    }
+    
+    #applyEffect {
+        width: 100%;
+        margin-top: 5px;
+    }
+}
+
+/* 在更小的屏幕上进一步调整 */
+@media (max-width: 480px) {
+    .entrance-option {
+        min-width: 100%;
+    }
+}
+
+#textCanvas {
+    margin-top: 1rem;
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    width: 100%;
+    max-width: 100%;
+    min-height: 200px;
+    height: auto;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
