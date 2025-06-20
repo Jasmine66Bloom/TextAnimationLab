@@ -27,13 +27,22 @@ class TextDance {
             this.setupCanvas();
         });
 
+        // 文本输入
+        document.getElementById('textInput').addEventListener('input', (e) => {
+            this.text = e.target.value || '';
+            this.startEntranceAnimation();
+        });
+        
         // 应用效果按钮
         document.getElementById('applyEffect').addEventListener('click', () => {
             this.applyEffects();
         });
         
-
-
+        // 保存GIF按钮
+        document.getElementById('saveGif').addEventListener('click', () => {
+            this.exportAsGif();
+        });
+        
         // 速度控制
         const speedControl = document.getElementById('speedControl');
         const speedValue = document.getElementById('speedValue');
@@ -73,8 +82,16 @@ class TextDance {
         });
     }
 
-    clear() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    clear(transparent = false) {
+        if (transparent) {
+            // 完全透明背景
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        } else {
+            // 白色背景（用于预览）
+            this.ctx.fillStyle = 'white';
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            this.ctx.fillStyle = 'black'; // 重置填充颜色
+        }
     }
 
     // 应用变换效果
@@ -672,11 +689,96 @@ class TextDance {
 
 
 
+    async exportAsGif() {
+        const statusEl = document.getElementById('saveStatus');
+        const originalSpeed = this.speed;
+        this.speed = 1; // 使用正常速度导出
+        
+        try {
+            statusEl.textContent = '正在生成GIF...';
+            
+            // 创建GIF（设置透明背景）
+            const gif = new GIF({
+                workers: 2,
+                quality: 10,
+                width: this.canvas.width,
+                height: this.canvas.height,
+                workerScript: 'gif.worker.js',
+                transparent: 0x000000,  // 设置透明色
+                background: 0x000000,    // 设置背景色为黑色（透明）
+                dither: false           // 关闭抖动以获得更好的透明效果
+            });
+            
+            // 捕获3秒的动画（60帧）
+            const frames = 30; // 30帧
+            const duration = 3; // 3秒
+            
+            for (let i = 0; i < frames; i++) {
+                // 更新动画时间
+                this.time = i / frames * duration;
+                
+                // 绘制当前帧（使用透明背景）
+                this.clear(true);
+                this.drawText();
+                
+                // 创建临时canvas来处理透明度
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = this.canvas.width;
+                tempCanvas.height = this.canvas.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                // 设置透明背景
+                tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
+                
+                // 绘制当前帧到临时canvas
+                tempCtx.drawImage(this.canvas, 0, 0);
+                
+                // 添加帧到GIF（使用透明背景）
+                gif.addFrame(tempCtx, {
+                    copy: true, 
+                    delay: duration * 1000 / frames,
+                    transparent: 0x000000  // 设置透明色
+                });
+                
+                // 更新进度
+                statusEl.textContent = `正在生成GIF... ${Math.round((i + 1) / frames * 100)}%`;
+                
+                // 让UI更新
+                await new Promise(resolve => requestAnimationFrame(resolve));
+            }
+            
+            // 渲染GIF
+            gif.on('finished', (blob) => {
+                // 创建下载链接
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `text-animation-${new Date().getTime()}.gif`;
+                document.body.appendChild(a);
+                a.click();
+                
+                // 清理
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    statusEl.textContent = 'GIF已保存！';
+                }, 100);
+            });
+            
+            gif.render();
+            
+        } catch (error) {
+            console.error('导出GIF失败:', error);
+            statusEl.textContent = '保存失败，请重试';
+        } finally {
+            this.speed = originalSpeed;
+        }
+    }
+    
     destroy() {
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
         }
-        // Remove event listeners here if needed
     }
 }
 

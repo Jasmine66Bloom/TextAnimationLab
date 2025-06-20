@@ -45,6 +45,23 @@ http-server
 3. 调整参数
 4. 实时预览
 
+## 示例效果
+
+以下是一些使用TextAnimationLab创建的文字动画效果示例：
+
+| 效果预览 | 效果预览 |
+|----------|----------|
+| ![示例1](./example/text-animation-1750386675810.gif) | ![示例2](./example/text-animation-1750386710859.gif) |
+| 波浪效果 + 彩虹色 | 弹跳动画 |
+| ![示例3](./example/text-animation-1750386742409.gif) | ![示例4](./example/text-animation-1750386759852.gif) |
+| 3D旋转效果 | 霓虹灯效果 |
+| ![示例5](./example/text-animation-1750386790280.gif) | ![示例6](./example/text-animation-1750386801666.gif) |
+| 打字机效果 | 模糊淡入 |
+| ![示例7](./example/text-animation-1750386814809.gif) | ![示例8](./example/text-animation-1750386832796.gif) |
+| 粒子效果 | 火焰效果 |
+| ![示例9](./example/text-animation-1750386853032.gif) |  |
+| 故障效果 | 更多效果... |
+
 ## 技术栈
 
 - HTML5 Canvas
