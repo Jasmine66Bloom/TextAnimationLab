@@ -2,17 +2,23 @@ class TextDance {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
-        this.text = '';
-        this.effects = new Set(['wave', 'rainbow']); // 默认选中波浪和彩虹效果
+        
+        const textInput = document.getElementById('textInput');
+        this.text = textInput.value; // 从HTML中读取初始文本
+
+        this.effects = new Set(['wave', 'rainbow']);
         this.time = 0;
+        this.lastTime = 0;
         this.speed = 1.0;
         this.entranceEffect = 'none';
-        this.entranceDuration = 1.5; // 默认动画时长1.5秒
-        this.entranceProgress = 0; // 0-1
-        this.entranceStartTime = 0;
+        this.entranceDuration = 1.5;
+        this.entranceProgress = 1; // 默认动画已完成
+        this.entranceStartTime = null; // 初始化为null
         this.animationId = null;
+        this.chars = [];
         
         this.setupCanvas();
+        this.createText();
         this.setupEventListeners();
         this.animate();
     }
@@ -20,6 +26,21 @@ class TextDance {
     setupCanvas() {
         this.canvas.width = Math.min(800, window.innerWidth - 40);
         this.canvas.height = 200;
+    }
+
+    createText() {
+        this.chars = [];
+        const text = this.text; // 使用当前文本，不再使用默认值
+        for (let i = 0; i < text.length; i++) {
+            this.chars.push({
+                char: text[i],
+                x: 0, y: 0, // 初始位置，将在update中计算
+                fontSize: 100, // 默认字体大小
+                fontFamily: 'Arial',
+                r: 255, g: 255, b: 255, a: 1, // 默认颜色
+                scale: 1
+            });
+        }
     }
 
     setupEventListeners() {
@@ -30,6 +51,7 @@ class TextDance {
         // 文本输入
         document.getElementById('textInput').addEventListener('input', (e) => {
             this.text = e.target.value || '';
+            this.createText(); // 重新生成字符对象
             this.startEntranceAnimation();
         });
         
@@ -49,7 +71,12 @@ class TextDance {
         const entranceEffectSelect = document.getElementById('entranceEffect');
         const entranceDuration = document.getElementById('entranceDuration');
         const durationValue = document.getElementById('durationValue');
-        
+        entranceDuration.addEventListener('input', (e) => {
+            this.entranceDuration = parseFloat(e.target.value);
+            durationValue.textContent = this.entranceDuration.toFixed(1) + 's';
+            this.reset();
+        });
+
         speedControl.addEventListener('input', (e) => {
             this.speed = parseFloat(e.target.value);
             speedValue.textContent = this.speed.toFixed(1) + 'x';
@@ -189,8 +216,8 @@ class TextDance {
     
     // 开始出现动画
     startEntranceAnimation() {
-        this.entranceStartTime = this.time;
         this.entranceProgress = 0;
+        this.entranceStartTime = this.time; // 记录当前时间为开始时间
     }
 
     // 更新出现动画进度
@@ -660,7 +687,7 @@ class TextDance {
     animate() {
         this.clear();
         this.drawText();
-        this.time += 0.016 * this.speed;
+        this.time += 0.016; // 修正速度计算逻辑，时间应线性增长
         this.updateEntranceProgress();
         this.animationId = requestAnimationFrame(() => this.animate());
     }
@@ -689,67 +716,138 @@ class TextDance {
 
 
 
+    update() {
+        // 更新动画进度
+        if (this.entranceStartTime !== null) {
+            const elapsed = (this.time - this.entranceStartTime) * this.speed;
+            this.entranceProgress = Math.min(elapsed / this.entranceDuration, 1);
+            if (this.entranceProgress === 1) {
+                this.entranceStartTime = null; // 动画完成后重置
+            }
+        }
+
+        const t = this.time * this.speed;
+        const centerX = this.canvas.width / 2;
+        const centerY = this.canvas.height / 2;
+        const textWidth = this.chars.length * 50; // 估算文本宽度
+
+        this.chars.forEach((char, i) => {
+            // 基础属性
+            char.x = centerX - textWidth / 2 + i * 50 + 25;
+            char.y = centerY;
+            char.a = 1;
+            char.scale = 1;
+
+            // 应用效果
+            if (this.effects.has('wave')) {
+                char.y += Math.sin(t * 0.1 + i * 0.5) * 20;
+            }
+            if (this.effects.has('rainbow')) {
+                const color = `hsl(${(t * 10 + i * 10) % 360}, 100%, 70%)`;
+                const rgb = color.match(/\d+/g);
+                if (rgb) {
+                    char.r = parseInt(rgb[0]);
+                    char.g = parseInt(rgb[1]);
+                    char.b = parseInt(rgb[2]);
+                }
+            }
+
+            // 应用入场动画
+            if (this.entranceProgress < 1) {
+                switch (this.entranceEffect) {
+                    case 'fade-in':
+                        char.a = this.entranceProgress;
+                        break;
+                    case 'slide-in-left':
+                        char.x -= (1 - this.entranceProgress) * 100;
+                        char.a = this.entranceProgress;
+                        break;
+                    case 'zoom-in':
+                        char.scale = this.entranceProgress;
+                        char.a = this.entranceProgress;
+                        break;
+                }
+            }
+        });
+    }
+
+    draw() {
+        // 清空画布，为绘制新的一帧做准备
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.save();
+
+        // 动画的核心逻辑（计算每个字符的位置、透明度、缩放等）
+        // 被封装在其他方法中（如 update），draw 函数只负责根据计算好的属性进行渲染。
+        this.chars.forEach(char => {
+            this.ctx.save();
+            this.ctx.font = `${char.fontSize}px '${char.fontFamily}'`;
+            this.ctx.fillStyle = `rgba(${char.r}, ${char.g}, ${char.b}, ${char.a})`;
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.translate(char.x, char.y);
+            this.ctx.scale(char.scale, char.scale);
+            this.ctx.fillText(char.char, 0, 0);
+            this.ctx.restore();
+        });
+
+        this.ctx.restore();
+    }
+
     async exportAsGif() {
         const statusEl = document.getElementById('saveStatus');
         const originalSpeed = this.speed;
-        this.speed = 1; // 使用正常速度导出
-        
+
+        // 为确保导出效果与预览一致，重置动画状态
+        this.time = 0;
+        this.startEntranceAnimation();
+
+        let workerUrl = null;
+        // 在导出期间临时将速度设置为1，以便我们能精确控制时间。
         try {
+            statusEl.textContent = '正在准备导出...';
+
+            const workerScriptContent = await fetch('gif.worker.js').then(res => {
+                if (!res.ok) throw new Error(`无法加载核心GIF脚本: ${res.statusText}`);
+                return res.text();
+            });
+
+            const workerBlob = new Blob([workerScriptContent], { type: 'application/javascript' });
+            workerUrl = URL.createObjectURL(workerBlob);
+
             statusEl.textContent = '正在生成GIF...';
             
-            // 创建GIF（设置透明背景）
             const gif = new GIF({
                 workers: 2,
                 quality: 10,
                 width: this.canvas.width,
                 height: this.canvas.height,
-                workerScript: 'gif.worker.js',
-                transparent: 0x000000,  // 设置透明色
-                background: 0x000000,    // 设置背景色为黑色（透明）
-                dither: false           // 关闭抖动以获得更好的透明效果
+                workerScript: workerUrl,
+                transparent: 0x000000,
+                dither: false
             });
-            
-            // 捕获3秒的动画（60帧）
-            const frames = 30; // 30帧
-            const duration = 3; // 3秒
-            
-            for (let i = 0; i < frames; i++) {
-                // 更新动画时间
-                this.time = i / frames * duration;
-                
-                // 绘制当前帧（使用透明背景）
-                this.clear(true);
+
+            const FPS = 20;
+            const logicalDuration = this.entranceDuration;
+            const realDuration = logicalDuration / originalSpeed; 
+            const frames = Math.round(realDuration * FPS);
+            const delay = 1000 / FPS;
+
+            for (let i = 0; i <= frames; i++) {
+                // this.time 现在代表实际流逝的时间，与 animate() 中的逻辑一致
+                this.time = (i / frames) * realDuration;
+
+                // 使用统一的逻辑更新和绘制
+                this.updateEntranceProgress();
+                this.clear(true); // 使用透明背景
                 this.drawText();
+
+                gif.addFrame(this.ctx, { copy: true, delay: delay });
                 
-                // 创建临时canvas来处理透明度
-                const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = this.canvas.width;
-                tempCanvas.height = this.canvas.height;
-                const tempCtx = tempCanvas.getContext('2d');
-                
-                // 设置透明背景
-                tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
-                
-                // 绘制当前帧到临时canvas
-                tempCtx.drawImage(this.canvas, 0, 0);
-                
-                // 添加帧到GIF（使用透明背景）
-                gif.addFrame(tempCtx, {
-                    copy: true, 
-                    delay: duration * 1000 / frames,
-                    transparent: 0x000000  // 设置透明色
-                });
-                
-                // 更新进度
-                statusEl.textContent = `正在生成GIF... ${Math.round((i + 1) / frames * 100)}%`;
-                
-                // 让UI更新
+                statusEl.textContent = `正在生成GIF... ${Math.round((i / frames) * 100)}%`;
                 await new Promise(resolve => requestAnimationFrame(resolve));
             }
             
-            // 渲染GIF
             gif.on('finished', (blob) => {
-                // 创建下载链接
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -757,7 +855,6 @@ class TextDance {
                 document.body.appendChild(a);
                 a.click();
                 
-                // 清理
                 setTimeout(() => {
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
@@ -769,17 +866,12 @@ class TextDance {
             
         } catch (error) {
             console.error('导出GIF失败:', error);
-            statusEl.textContent = '保存失败，请重试';
+            statusEl.textContent = `保存失败: ${error.message}`;
         } finally {
             this.speed = originalSpeed;
-        }
-    }
-    
-    destroy() {
-        if (this.animationId) {
-            cancelAnimationFrame(this.animationId);
+            if (workerUrl) {
+                URL.revokeObjectURL(workerUrl);
+            }
         }
     }
 }
-
-// 初始化代码已移至HTML文件中
