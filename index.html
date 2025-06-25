@@ -117,36 +117,42 @@
         </div>
         
         <div class="entrance-controls">
-            <div class="entrance-option">
-                <label for="entranceEffect">出现效果</label>
-                <select id="entranceEffect">
-                    <option value="none">无</option>
-                    <option value="fade">淡入</option>
-                    <option value="slideUp">上滑入</option>
-                    <option value="slideDown">下滑入</option>
-                    <option value="slideLeft">左滑入</option>
-                    <option value="slideRight">右滑入</option>
-                    <option value="bounceIn">弹跳进入</option>
-                    <option value="zoomIn">放大进入</option>
-                    <option value="flipX">水平翻转</option>
-                    <option value="flipY">垂直翻转</option>
-                    <option value="random">随机字符</option>
-                </select>
+            <div class="control-row">
+                <div class="entrance-option">
+                    <label for="entranceEffect">出现效果</label>
+                    <select id="entranceEffect">
+                        <option value="none">无</option>
+                        <option value="fade">淡入</option>
+                        <option value="slideUp">上滑入</option>
+                        <option value="slideDown">下滑入</option>
+                        <option value="slideLeft">左滑入</option>
+                        <option value="slideRight">右滑入</option>
+                        <option value="bounceIn">弹跳进入</option>
+                        <option value="zoomIn">放大进入</option>
+                        <option value="flipX">水平翻转</option>
+                        <option value="flipY">垂直翻转</option>
+                        <option value="random">随机字符</option>
+                    </select>
+                </div>
+                <div class="entrance-option">
+                    <label for="entranceEffectDuration">出现时长</label>
+                    <input type="range" id="entranceEffectDuration" min="0.1" max="5" step="0.1" value="1.5">
+                    <span id="entranceDurationValue">1.5s</span>
+                </div>
             </div>
-            
-            <div class="entrance-option">
-                <label for="entranceDuration">动画时长</label>
-                <input type="range" id="entranceDuration" min="0.5" max="5" step="0.1" value="1.5">
-                <span id="durationValue">1.5s</span>
+            <div class="control-row">
+                <div class="entrance-option">
+                    <label for="animationDuration">动画时长</label>
+                    <input type="range" id="animationDuration" min="1" max="20" step="0.5" value="5">
+                    <span id="animationDurationValue">5.0s</span>
+                </div>
+                <div class="entrance-option">
+                    <label for="speedControl">速度</label>
+                    <input type="range" id="speedControl" min="0" max="10" step="0.1" value="1.0">
+                    <span id="speedValue">1.0x</span>
+                </div>
+                <button id="applyEffect">应用效果</button>
             </div>
-            
-            <div class="entrance-option">
-                <label for="speedControl">速度</label>
-                <input type="range" id="speedControl" min="0.1" max="3" step="0.1" value="1.0">
-                <span id="speedValue">1.0x</span>
-            </div>
-            
-            <button id="applyEffect">应用效果</button>
         </div>
         
         <canvas id="textCanvas"></canvas>

@@ -416,20 +416,23 @@ button:hover {
 /* 控制项容器 */
 .entrance-controls {
     display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 15px;
+    flex-direction: column; /* 改为纵向排列 */
+    gap: 15px; /* 行间距 */
+    margin-bottom: 20px;
     background: #f8f9fa;
     border: 1px solid #e9ecef;
-    border-radius: 6px;
-    padding: 8px 15px;
-    margin: 10px 0;
-    width: 100%;
-    box-sizing: border-box;
-    overflow-x: auto;
-    white-space: nowrap;
-    scrollbar-width: thin;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
+
+.control-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+}
+
 
 .entrance-option {
     display: flex;

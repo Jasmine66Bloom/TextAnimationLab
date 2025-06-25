@@ -11,7 +11,8 @@ class TextDance {
         this.lastTime = 0;
         this.speed = 1.0;
         this.entranceEffect = 'none';
-        this.entranceDuration = 1.5;
+        this.entranceEffectDuration = 1.5;
+        this.animationDuration = 5;
         this.entranceProgress = 1; // 默认动画已完成
         this.entranceStartTime = null; // 初始化为null
         this.animationId = null;
@@ -69,13 +70,26 @@ class TextDance {
         const speedControl = document.getElementById('speedControl');
         const speedValue = document.getElementById('speedValue');
         const entranceEffectSelect = document.getElementById('entranceEffect');
-        const entranceDuration = document.getElementById('entranceDuration');
-        const durationValue = document.getElementById('durationValue');
-        entranceDuration.addEventListener('input', (e) => {
-            this.entranceDuration = parseFloat(e.target.value);
-            durationValue.textContent = this.entranceDuration.toFixed(1) + 's';
-            this.reset();
-        });
+
+        // 出现时长
+        const entranceEffectDurationControl = document.getElementById('entranceEffectDuration');
+        const entranceDurationValue = document.getElementById('entranceDurationValue');
+        if (entranceEffectDurationControl) {
+            entranceEffectDurationControl.addEventListener('input', (e) => {
+                this.entranceEffectDuration = parseFloat(e.target.value);
+                if(entranceDurationValue) entranceDurationValue.textContent = this.entranceEffectDuration.toFixed(1) + 's';
+            });
+        }
+
+        // 动画时长
+        const animationDurationControl = document.getElementById('animationDuration');
+        const animationDurationValue = document.getElementById('animationDurationValue');
+        if (animationDurationControl) {
+            animationDurationControl.addEventListener('input', (e) => {
+                this.animationDuration = parseFloat(e.target.value);
+                if(animationDurationValue) animationDurationValue.textContent = this.animationDuration.toFixed(1) + 's';
+            });
+        }
 
         speedControl.addEventListener('input', (e) => {
             this.speed = parseFloat(e.target.value);
@@ -86,11 +100,6 @@ class TextDance {
         entranceEffectSelect.addEventListener('change', (e) => {
             this.entranceEffect = e.target.value;
             this.startEntranceAnimation();
-        });
-        
-        entranceDuration.addEventListener('input', (e) => {
-            this.entranceDuration = parseFloat(e.target.value);
-            durationValue.textContent = this.entranceDuration.toFixed(1) + 's';
         });
 
         // 多选效果
@@ -217,15 +226,16 @@ class TextDance {
     // 开始出现动画
     startEntranceAnimation() {
         this.entranceProgress = 0;
-        this.entranceStartTime = this.time; // 记录当前时间为开始时间
+        this.entranceStartTime = performance.now();
     }
 
     // 更新出现动画进度
     updateEntranceProgress() {
         if (this.entranceEffect === 'none' || this.entranceProgress >= 1) return;
         
-        const elapsed = (this.time - this.entranceStartTime) * this.speed;
-        this.entranceProgress = Math.min(1, elapsed / this.entranceDuration);
+        const now = performance.now();
+        const elapsed = (now - this.entranceStartTime) / 1000; // 转换为秒
+        this.entranceProgress = Math.min(1, elapsed / this.entranceEffectDuration);
     }
 
     // 获取字符样式
@@ -827,14 +837,13 @@ class TextDance {
             });
 
             const FPS = 20;
-            const logicalDuration = this.entranceDuration;
-            const realDuration = logicalDuration / originalSpeed; 
-            const frames = Math.round(realDuration * FPS);
+            const totalDuration = this.entranceEffectDuration + this.animationDuration;
+            const frames = Math.round(totalDuration * FPS);
             const delay = 1000 / FPS;
 
             for (let i = 0; i <= frames; i++) {
-                // this.time 现在代表实际流逝的时间，与 animate() 中的逻辑一致
-                this.time = (i / frames) * realDuration;
+                // 更新时间，确保动画平滑进行
+                this.time = (i / FPS);
 
                 // 使用统一的逻辑更新和绘制
                 this.updateEntranceProgress();
