@@ -10,50 +10,16 @@
 <body>
     <div class="container">
         <h1>TextAnimationLab</h1>
-        
-                <div class="controls">
-            <input type="text" id="textInput" placeholder="输入要显示的文字..." value="文字动画效果">
-            <label for="fontSelector">选择字体:</label>
-                                    <select id="fontSelector">
-                <optgroup label="English Fonts">
-                    <option value="'Indie Flower', cursive">Indie Flower</option>
-                    <option value="'Lato', sans-serif">Lato</option>
-                    <option value="'Lobster', cursive">Lobster</option>
-                    <option value="'Merriweather', serif">Merriweather</option>
-                    <option value="'Montserrat', sans-serif">Montserrat</option>
-                    <option value="'Nunito', sans-serif">Nunito</option>
-                    <option value="'Oswald', sans-serif">Oswald</option>
-                    <option value="'Pacifico', cursive">Pacifico</option>
-                    <option value="'Playfair Display', serif">Playfair Display</option>
-                    <option value="'Poppins', sans-serif">Poppins</option>
-                    <option value="'Raleway', sans-serif">Raleway</option>
-                    <option value="'Roboto', sans-serif">Roboto</option>
-                    <option value="'Shadows Into Light', cursive">Shadows Into Light</option>
-                    <option value="'Ubuntu', sans-serif">Ubuntu</option>
-                </optgroup>
-                <optgroup label="Chinese Fonts">
-                    <option value="'AaBeiDaoHuanJing HuaYuanJiaQi', cursive">AaBeiDaoHuanJing HuaYuanJiaQi</option>
-                    <option value="'AaDongQiChang YueYangLouJi', cursive">AaDongQiChang YueYangLouJi</option>
-                    <option value="'AaKuangXiaTi', cursive">AaKuangXiaTi</option>
-                    <option value="'LiXuKeShuFa', cursive">LiXuKeShuFa</option>
-                    <option value="'ShangShouQingFengTi', cursive">ShangShouQingFengTi</option>
-                    <option value="'ShanHaiGuiHuaGaoShouShuW', cursive">ShanHaiGuiHuaGaoShouShuW</option>
-                    <option value="'XiangJiaHongMaoBiXingShu', cursive">XiangJiaHongMaoBiXingShu</option>
-                    <option value="'XiangJiaHongZiJi ZhongHuaJinBangTi', cursive">XiangJiaHongZiJi ZhongHuaJinBangTi</option>
-                    <option value="'KuangaoXingshu', cursive">KuangaoXingshu</option>
-                    <option value="'Liujianmaocao', cursive">Liujianmaocao</option>
-                    <option value="'Longcang', cursive">Longcang</option>
-                    <option value="'LXGW WenKai', sans-serif">LXGW WenKai</option>
-                    <option value="'Mashanzheng', sans-serif">Mashanzheng</option>
-                    <option value="'Noto Sans SC', sans-serif">Noto Sans SC</option>
-                    <option value="'Noto Serif SC', serif">Noto Serif SC</option>
-                    <option value="'ZCOOL QingKe HuangYou', sans-serif">ZCOOL QingKe HuangYou</option>
-                    <option value="'ZCOOL XiaoWei', serif">ZCOOL XiaoWei</option>
-                    <option value="'ZCOOL KuaiLe', sans-serif">ZCOOL KuaiLe</option>
-                    <option value="'Zhi Mang Xing', cursive">Zhi Mang Xing</option>
-                </optgroup>
-            </select>
-        </div>
+        <div class="controls">
+            <div class="control-group">
+                <input type="text" id="textInput" placeholder="输入要显示的文字..." value="文字动画效果">
+            </div>
+            <div class="control-group">
+                <label for="canvasWidth">画布宽度:</label>
+                <input type="number" id="canvasWidth" value="800">
+                <label for="canvasHeight">画布高度:</label>
+                <input type="number" id="canvasHeight" value="400">
+            </div>
         
         <div class="effect-options">
             <div class="effect-group">
@@ -177,38 +143,48 @@
                 </div>
                                 <div class="entrance-option">
                     <label for="entranceEffectDuration">出现时长</label>
-                    <input type="range" id="entranceEffectDuration" min="0.1" max="5" step="0.1" value="1.5">
+                    <input type="range" id="entranceEffectDuration" min="0.1" max="10" step="0.1" value="1.5">
                     <span id="entranceDurationValue">1.5s</span>
                 </div>
                 <div class="entrance-option">
-                    <label for="fontSelect">选择字体</label>
-                    <select id="fontSelect">
+                    <label for="fontSelector">选择字体</label>
+                    <select id="fontSelector">
                         <optgroup label="英文字体">
-                            <option value="'Montserrat', sans-serif">Montserrat</option>
-                            <option value="'Lato', sans-serif">Lato</option>
-                            <option value="'Oswald', sans-serif">Oswald</option>
-                            <option value="'Raleway', sans-serif">Raleway</option>
-                            <option value="'Poppins', sans-serif">Poppins</option>
-                            <option value="'Nunito', sans-serif">Nunito</option>
-                            <option value="'Playfair Display', serif">Playfair Display</option>
-                            <option value="'Merriweather', serif">Merriweather</option>
-                            <option value="'Ubuntu', sans-serif">Ubuntu</option>
                             <option value="'Indie Flower', cursive">Indie Flower</option>
-                            <option value="'Shadows Into Light', cursive">Shadows Into Light</option>
+                            <option value="'Lato', sans-serif">Lato</option>
                             <option value="'Lobster', cursive">Lobster</option>
+                            <option value="'Merriweather', serif">Merriweather</option>
+                            <option value="'Montserrat', sans-serif">Montserrat</option>
+                            <option value="'Nunito', sans-serif">Nunito</option>
+                            <option value="'Oswald', sans-serif">Oswald</option>
                             <option value="'Pacifico', cursive">Pacifico</option>
+                            <option value="'Playfair Display', serif">Playfair Display</option>
+                            <option value="'Poppins', sans-serif">Poppins</option>
+                            <option value="'Raleway', sans-serif">Raleway</option>
                             <option value="'Roboto', sans-serif">Roboto</option>
+                            <option value="'Shadows Into Light', cursive">Shadows Into Light</option>
+                            <option value="'Ubuntu', sans-serif">Ubuntu</option>
                         </optgroup>
                         <optgroup label="中文字体">
+                            <option value="'AaBeiDaoHuanJingHuaYuanJiaQi', sans-serif">北海道环境花园假期</option>
+                            <option value="'AaDongQiChangYueYangLouJi', sans-serif">董其昌《岳阳楼记》</option>
+                            <option value="'AaKuangXiaTi', sans-serif">AaKuangXiaTi</option>
+                            <option value="'LiXuKeShuFa', cursive">李旭科书法</option>
+                            <option value="'ShangShouQingFengTi', sans-serif">上首清风体</option>
+                            <option value="'ShanHaiGuiHuaGaoShouShuW', sans-serif">山海规划高手书W</option>
+                            <option value="'XiangJiaHongMaoBiXingShu', cursive">向佳红毛笔行书</option>
+                            <option value="'XiangJiaHongZiJi ZhongHuaJinBangTi', sans-serif">向佳红自己中华金榜体</option>
+                            <option value="'KuangaoXingshu', cursive">狂草行书</option>
+                            <option value="'Liujianmaocao', cursive">刘建茂草</option>
+                            <option value="'Longcang', cursive">龙藏体</option>
+                            <option value="'LXGW WenKai', sans-serif">霞鹜文楷</option>
+                            <option value="'Mashanzheng', cursive">马善政</option>
                             <option value="'Noto Sans SC', sans-serif">思源黑体</option>
                             <option value="'Noto Serif SC', serif">思源宋体</option>
-                            <option value="'Ma Shan Zheng', cursive">马善政</option>
-                            <option value="'Zhi Mang Xing', cursive">钟齐志莽行</option>
-                            <option value="'Long Cang', cursive">龙藏体</option>
-                            <option value="'Liu Jian Mao Cao', cursive">刘建茂草</option>
-                            <option value="'ZCOOL XiaoWei', sans-serif">站酷小薇</option>
-                            <option value="'ZCOOL QingKe HuangYou', sans-serif">站酷酷黑</option>
+                            <option value="'ZCOOL QingKe HuangYou', sans-serif">站酷庆科黄油体</option>
+                            <option value="'ZCOOL XiaoWei', serif">站酷小薇体</option>
                             <option value="'ZCOOL KuaiLe', sans-serif">站酷快乐体</option>
+                            <option value="'Zhi Mang Xing', cursive">钟齐志莽行</option>
                         </optgroup>
                     </select>
                 </div>
@@ -239,20 +215,6 @@
     
     <script src="https://cdn.jsdelivr.net/npm/gif.js/dist/gif.js"></script>
     <script src="text-dance.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // 等待所有在CSS中定义的字体都加载完毕
-            document.fonts.ready.then(() => {
-                // 然后再初始化应用
-                const app = new TextDance('textCanvas');
 
-                // 确保应用效果按钮可用
-                const applyBtn = document.getElementById('applyEffect');
-                if (applyBtn) {
-                    applyBtn.disabled = false;
-                }
-            });
-        });
-    </script>
 </body>
 </html>

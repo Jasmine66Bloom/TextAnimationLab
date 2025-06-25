@@ -17,6 +17,10 @@ class TextDance {
         this.entranceStartTime = null; // 初始化为null
         this.animationId = null;
         this.fontFamily = "'Montserrat', sans-serif";
+        this.widthInput = document.getElementById('canvasWidth');
+        this.heightInput = document.getElementById('canvasHeight');
+        this.saveGifButton = document.getElementById('saveGif');
+        console.log('In constructor, saveGifButton is:', this.saveGifButton);
         this.chars = [];
         
         this.setupCanvas();
@@ -26,8 +30,8 @@ class TextDance {
     }
 
     setupCanvas() {
-        this.canvas.width = Math.min(800, window.innerWidth - 40);
-        this.canvas.height = 200;
+        this.canvas.width = this.widthInput.value;
+        this.canvas.height = this.heightInput.value;
     }
 
     createText() {
@@ -46,101 +50,73 @@ class TextDance {
     }
 
     setupEventListeners() {
-        window.addEventListener('resize', () => {
-            this.setupCanvas();
-        });
+        // Helper to add event listener safely
+        const addListener = (id, event, handler) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener(event, handler);
+            }
+        };
 
-        // 文本输入
-        document.getElementById('textInput').addEventListener('input', (e) => {
+        // Canvas size
+        addListener('canvasWidth', 'change', () => { this.setupCanvas(); this.createText(); });
+        addListener('canvasHeight', 'change', () => { this.setupCanvas(); this.createText(); });
+
+        // Text input
+        addListener('textInput', 'input', (e) => {
             this.text = e.target.value || '';
-            this.createText(); // 重新生成字符对象
+            this.createText();
             this.startEntranceAnimation();
         });
-        
-        // 应用效果按钮
-        document.getElementById('applyEffect').addEventListener('click', () => {
-            this.applyEffects();
-        });
-        
-        // 保存GIF按钮
-        document.getElementById('saveGif').addEventListener('click', () => {
-            this.exportAsGif();
-        });
-        
-        // 速度控制
-        const speedControl = document.getElementById('speedControl');
-        const speedValue = document.getElementById('speedValue');
-        const entranceEffectSelect = document.getElementById('entranceEffect');
 
-        // 出现时长
-        const entranceEffectDurationControl = document.getElementById('entranceEffectDuration');
-        const entranceDurationValue = document.getElementById('entranceDurationValue');
-        if (entranceEffectDurationControl) {
-            entranceEffectDurationControl.addEventListener('input', (e) => {
-                                this.entranceEffectDuration = parseFloat(e.target.value);
-
-        const fontSelector = document.getElementById('fontSelector');
-        fontSelector.addEventListener('change', (e) => {
+        // Font selector
+        addListener('fontSelector', 'change', (e) => {
             this.fontFamily = e.target.value;
             this.createText();
         });
-                if(entranceDurationValue) entranceDurationValue.textContent = this.entranceEffectDuration.toFixed(1) + 's';
-            });
-        }
 
-        // 动画时长
-        const animationDurationControl = document.getElementById('animationDuration');
-        const animationDurationValue = document.getElementById('animationDurationValue');
-        if (animationDurationControl) {
-            animationDurationControl.addEventListener('input', (e) => {
-                this.animationDuration = parseFloat(e.target.value);
-                if(animationDurationValue) animationDurationValue.textContent = this.animationDuration.toFixed(1) + 's';
-            });
-        }
-
-        speedControl.addEventListener('input', (e) => {
-            this.speed = parseFloat(e.target.value);
-            speedValue.textContent = this.speed.toFixed(1) + 'x';
+        // Apply effects button
+        addListener('applyEffect', 'click', () => {
+            this.applyEffects();
         });
-        
-        // 出现效果控制
-        entranceEffectSelect.addEventListener('change', (e) => {
+
+        // Save GIF button
+        addListener('saveGif', 'click', () => {
+            this.exportAsGif();
+        });
+
+        // Entrance effect selector
+        addListener('entranceEffect', 'change', (e) => {
             this.entranceEffect = e.target.value;
             this.startEntranceAnimation();
         });
 
-        // 字体选择
-        const fontSelect = document.getElementById('fontSelect');
-        if (fontSelect) {
-            fontSelect.addEventListener('change', async (e) => {
-                this.fontFamily = e.target.value;
-                try {
-                    // 提取字体名称，例如 "'ZCOOL KuaiLe', cursive" -> "ZCOOL KuaiLe"
-                    const fontName = this.fontFamily.split(',')[0].replace(/['"]/g, '').trim();
-                    // 等待字体加载完成
-                    await document.fonts.load(`1em "${fontName}"`);
-                } catch (error) {
-                    console.error(`字体 '${this.fontFamily}' 加载失败:`, error);
-                } finally {
-                    // 无论字体是否加载成功，都重新创建文本并开始动画
-                    this.createText();
-                    this.startEntranceAnimation();
+        // Sliders
+        const setupSlider = (controlId, valueId, property, unit = '') => {
+            addListener(controlId, 'input', (e) => {
+                this[property] = parseFloat(e.target.value);
+                const valueElement = document.getElementById(valueId);
+                if (valueElement) {
+                    valueElement.textContent = this[property].toFixed(1) + unit;
                 }
             });
-        }
+        };
 
-        // 多选效果
+        setupSlider('speedControl', 'speedValue', 'speed', 'x');
+        setupSlider('entranceEffectDuration', 'entranceDurationValue', 'entranceEffectDuration', 's');
+        setupSlider('animationDuration', 'animationDurationValue', 'animationDuration', 's');
+
+        // Effect checkboxes
         const checkboxes = document.querySelectorAll('input[name="effect"]');
         checkboxes.forEach(checkbox => {
             checkbox.checked = this.effects.has(checkbox.value);
-            
             checkbox.addEventListener('change', () => {
                 if (checkbox.checked) {
                     this.effects.add(checkbox.value);
                 } else {
                     this.effects.delete(checkbox.value);
                 }
-                this.time = 0;
+                this.time = 0; // Reset time to see effect immediately
             });
         });
     }
@@ -488,15 +464,18 @@ class TextDance {
             const style = this.getCharStyle(char, i, visibleChars);
             
             // 应用出现效果
-            const entrance = this.applyEntranceEffect(
-                char, 
-                x, 
-                centerY, 
-                i, 
-                visibleChars,
-                charWidth,
-                centerY
-            );
+            let entrance = { alpha: 1 }; // 默认可见
+            if (this.entranceStartTime !== null) {
+                entrance = this.applyEntranceEffect(
+                    char, 
+                    x, 
+                    centerY, 
+                    i, 
+                    visibleChars,
+                    charWidth,
+                    centerY
+                );
+            }
             
             // 如果有随机字符效果，替换字符
             if (entrance.char) {
@@ -723,6 +702,7 @@ class TextDance {
 
     animate() {
         this.clear();
+
         this.drawText();
         this.time += 0.016; // 修正速度计算逻辑，时间应线性增长
         this.updateEntranceProgress();
@@ -911,3 +891,10 @@ class TextDance {
         }
     }
 }
+
+window.addEventListener('DOMContentLoaded', () => {
+    // Ensure fonts are loaded before initializing to prevent blank canvas
+    document.fonts.ready.then(() => {
+        new TextDance('textCanvas');
+    });
+});

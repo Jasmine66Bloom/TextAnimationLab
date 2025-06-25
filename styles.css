@@ -607,8 +607,10 @@ button:hover {
 
 #textCanvas {
     margin-top: 1rem;
-    background: white;
-    border: 1px solid #e9ecef;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 6px;
     width: 100%;
     max-width: 100%;
