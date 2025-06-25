@@ -17,8 +17,11 @@ class TextDance {
         this.entranceStartTime = null; // 初始化为null
         this.animationId = null;
         this.fontFamily = "'Montserrat', sans-serif";
+        this.fontSize = this.fontSizeSlider ? parseInt(this.fontSizeSlider.value) : 100;
         this.widthInput = document.getElementById('canvasWidth');
         this.heightInput = document.getElementById('canvasHeight');
+        this.fontSizeSlider = document.getElementById('fontSizeSlider');
+        this.fontSizeValue = document.getElementById('fontSizeValue');
         this.saveGifButton = document.getElementById('saveGif');
         console.log('In constructor, saveGifButton is:', this.saveGifButton);
         this.chars = [];
@@ -41,7 +44,7 @@ class TextDance {
             this.chars.push({
                 char: text[i],
                 x: 0, y: 0, // 初始位置，将在update中计算
-                fontSize: 100, // 默认字体大小
+                fontSize: this.fontSize,
                 fontFamily: this.fontFamily,
                 r: 255, g: 255, b: 255, a: 1, // 默认颜色
                 scale: 1
@@ -61,6 +64,14 @@ class TextDance {
         // Canvas size
         addListener('canvasWidth', 'change', () => { this.setupCanvas(); this.createText(); });
         addListener('canvasHeight', 'change', () => { this.setupCanvas(); this.createText(); });
+
+        addListener('fontSizeSlider', 'input', (e) => {
+            this.fontSize = parseInt(e.target.value);
+            if (this.fontSizeValue) {
+                this.fontSizeValue.textContent = `${this.fontSize}px`;
+            }
+            this.createText();
+        });
 
         // Text input
         addListener('textInput', 'input', (e) => {
@@ -116,6 +127,7 @@ class TextDance {
                 } else {
                     this.effects.delete(checkbox.value);
                 }
+
                 this.time = 0; // Reset time to see effect immediately
             });
         });
@@ -431,7 +443,7 @@ class TextDance {
         if (!this.text) return;
 
         this.ctx.save();
-        this.ctx.font = `bold 48px ${this.fontFamily}`;
+        this.ctx.font = `bold ${this.fontSize}px ${this.fontFamily}`;
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
 
