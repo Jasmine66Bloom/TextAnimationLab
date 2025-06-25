@@ -5,13 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TextAnimationLab</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="fonts.css">
 </head>
 <body>
     <div class="container">
         <h1>TextAnimationLab</h1>
         
-        <div class="controls">
+                <div class="controls">
             <input type="text" id="textInput" placeholder="输入要显示的文字..." value="文字动画效果">
+            <label for="fontSelector">选择字体:</label>
+                                    <select id="fontSelector">
+                <option value="'Indie Flower', cursive">Indie Flower</option>
+                <option value="'Lato', sans-serif">Lato</option>
+                <option value="'Liujianmaocao', cursive">Liujianmaocao</option>
+                <option value="'Lobster', cursive">Lobster</option>
+                <option value="'Longcang', cursive">Longcang</option>
+                <option value="'Mashanzheng', sans-serif">Mashanzheng</option>
+                <option value="'Merriweather', serif">Merriweather</option>
+                <option value="'Montserrat', sans-serif">Montserrat</option>
+                <option value="'Noto Sans SC', sans-serif">Noto Sans SC</option>
+                <option value="'Noto Serif SC', serif">Noto Serif SC</option>
+                <option value="'Nunito', sans-serif">Nunito</option>
+                <option value="'Oswald', sans-serif">Oswald</option>
+                <option value="'Pacifico', cursive">Pacifico</option>
+                <option value="'Playfair Display', serif">Playfair Display</option>
+                <option value="'Poppins', sans-serif">Poppins</option>
+                <option value="'Raleway', sans-serif">Raleway</option>
+                <option value="'Roboto', sans-serif">Roboto</option>
+                <option value="'Shadows Into Light', cursive">Shadows Into Light</option>
+                <option value="'Ubuntu', sans-serif">Ubuntu</option>
+                <option value="'ZCOOL QingKe HuangYou', sans-serif">ZCOOL QingKe HuangYou</option>
+                <option value="'ZCOOL XiaoWei', serif">ZCOOL XiaoWei</option>
+                <option value="'ZCOOL KuaiLe', sans-serif">ZCOOL KuaiLe</option>
+                <option value="'Zhi Mang Xing', cursive">Zhi Mang Xing</option>
+            </select>
         </div>
         
         <div class="effect-options">
@@ -134,10 +161,42 @@
                         <option value="random">随机字符</option>
                     </select>
                 </div>
-                <div class="entrance-option">
+                                <div class="entrance-option">
                     <label for="entranceEffectDuration">出现时长</label>
                     <input type="range" id="entranceEffectDuration" min="0.1" max="5" step="0.1" value="1.5">
                     <span id="entranceDurationValue">1.5s</span>
+                </div>
+                <div class="entrance-option">
+                    <label for="fontSelect">选择字体</label>
+                    <select id="fontSelect">
+                        <optgroup label="英文字体">
+                            <option value="'Montserrat', sans-serif">Montserrat</option>
+                            <option value="'Lato', sans-serif">Lato</option>
+                            <option value="'Oswald', sans-serif">Oswald</option>
+                            <option value="'Raleway', sans-serif">Raleway</option>
+                            <option value="'Poppins', sans-serif">Poppins</option>
+                            <option value="'Nunito', sans-serif">Nunito</option>
+                            <option value="'Playfair Display', serif">Playfair Display</option>
+                            <option value="'Merriweather', serif">Merriweather</option>
+                            <option value="'Ubuntu', sans-serif">Ubuntu</option>
+                            <option value="'Indie Flower', cursive">Indie Flower</option>
+                            <option value="'Shadows Into Light', cursive">Shadows Into Light</option>
+                            <option value="'Lobster', cursive">Lobster</option>
+                            <option value="'Pacifico', cursive">Pacifico</option>
+                            <option value="'Roboto', sans-serif">Roboto</option>
+                        </optgroup>
+                        <optgroup label="中文字体">
+                            <option value="'Noto Sans SC', sans-serif">思源黑体</option>
+                            <option value="'Noto Serif SC', serif">思源宋体</option>
+                            <option value="'Ma Shan Zheng', cursive">马善政</option>
+                            <option value="'Zhi Mang Xing', cursive">钟齐志莽行</option>
+                            <option value="'Long Cang', cursive">龙藏体</option>
+                            <option value="'Liu Jian Mao Cao', cursive">刘建茂草</option>
+                            <option value="'ZCOOL XiaoWei', sans-serif">站酷小薇</option>
+                            <option value="'ZCOOL QingKe HuangYou', sans-serif">站酷酷黑</option>
+                            <option value="'ZCOOL KuaiLe', sans-serif">站酷快乐体</option>
+                        </optgroup>
+                    </select>
                 </div>
             </div>
             <div class="control-row">
@@ -167,18 +226,18 @@
     <script src="https://cdn.jsdelivr.net/npm/gif.js/dist/gif.js"></script>
     <script src="text-dance.js"></script>
     <script>
-        // 等待所有资源加载完成
         document.addEventListener('DOMContentLoaded', () => {
-            // 移除不相关的CCapture检查
-            
-            // 初始化应用
-            const app = new TextDance('textCanvas');
-            
-            // 确保应用效果按钮可用
-            const applyBtn = document.getElementById('applyEffect');
-            if (applyBtn) {
-                applyBtn.click();
-            }
+            // 等待所有在CSS中定义的字体都加载完毕
+            document.fonts.ready.then(() => {
+                // 然后再初始化应用
+                const app = new TextDance('textCanvas');
+
+                // 确保应用效果按钮可用
+                const applyBtn = document.getElementById('applyEffect');
+                if (applyBtn) {
+                    applyBtn.disabled = false;
+                }
+            });
         });
     </script>
 </body>

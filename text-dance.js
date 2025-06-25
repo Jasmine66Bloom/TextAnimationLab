@@ -16,6 +16,7 @@ class TextDance {
         this.entranceProgress = 1; // 默认动画已完成
         this.entranceStartTime = null; // 初始化为null
         this.animationId = null;
+        this.fontFamily = "'Montserrat', sans-serif";
         this.chars = [];
         
         this.setupCanvas();
@@ -37,7 +38,7 @@ class TextDance {
                 char: text[i],
                 x: 0, y: 0, // 初始位置，将在update中计算
                 fontSize: 100, // 默认字体大小
-                fontFamily: 'Arial',
+                fontFamily: this.fontFamily,
                 r: 255, g: 255, b: 255, a: 1, // 默认颜色
                 scale: 1
             });
@@ -76,7 +77,13 @@ class TextDance {
         const entranceDurationValue = document.getElementById('entranceDurationValue');
         if (entranceEffectDurationControl) {
             entranceEffectDurationControl.addEventListener('input', (e) => {
-                this.entranceEffectDuration = parseFloat(e.target.value);
+                                this.entranceEffectDuration = parseFloat(e.target.value);
+
+        const fontSelector = document.getElementById('fontSelector');
+        fontSelector.addEventListener('change', (e) => {
+            this.fontFamily = e.target.value;
+            this.createText();
+        });
                 if(entranceDurationValue) entranceDurationValue.textContent = this.entranceEffectDuration.toFixed(1) + 's';
             });
         }
@@ -101,6 +108,26 @@ class TextDance {
             this.entranceEffect = e.target.value;
             this.startEntranceAnimation();
         });
+
+        // 字体选择
+        const fontSelect = document.getElementById('fontSelect');
+        if (fontSelect) {
+            fontSelect.addEventListener('change', async (e) => {
+                this.fontFamily = e.target.value;
+                try {
+                    // 提取字体名称，例如 "'ZCOOL KuaiLe', cursive" -> "ZCOOL KuaiLe"
+                    const fontName = this.fontFamily.split(',')[0].replace(/['"]/g, '').trim();
+                    // 等待字体加载完成
+                    await document.fonts.load(`1em "${fontName}"`);
+                } catch (error) {
+                    console.error(`字体 '${this.fontFamily}' 加载失败:`, error);
+                } finally {
+                    // 无论字体是否加载成功，都重新创建文本并开始动画
+                    this.createText();
+                    this.startEntranceAnimation();
+                }
+            });
+        }
 
         // 多选效果
         const checkboxes = document.querySelectorAll('input[name="effect"]');
@@ -428,7 +455,7 @@ class TextDance {
         if (!this.text) return;
 
         this.ctx.save();
-        this.ctx.font = 'bold 48px Arial';
+        this.ctx.font = `bold 48px ${this.fontFamily}`;
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
 
