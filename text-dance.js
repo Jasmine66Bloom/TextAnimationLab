@@ -23,13 +23,15 @@ class TextDance {
         this.fontSizeSlider = document.getElementById('fontSizeSlider');
         this.fontSizeValue = document.getElementById('fontSizeValue');
         this.saveGifButton = document.getElementById('saveGif');
+        this.verticalToggle = document.getElementById('verticalToggle');
+        this.isVertical = this.verticalToggle ? this.verticalToggle.checked : false;
         console.log('In constructor, saveGifButton is:', this.saveGifButton);
         this.chars = [];
         
         this.setupCanvas();
         this.createText();
         this.setupEventListeners();
-        this.animate();
+        this.animate(0);
     }
 
     setupCanvas() {
@@ -93,6 +95,7 @@ class TextDance {
 
         // Save GIF button
         addListener('saveGif', 'click', () => {
+            if (this.saveGifButton.disabled) return;
             this.exportAsGif();
         });
 
@@ -130,6 +133,11 @@ class TextDance {
 
                 this.time = 0; // Reset time to see effect immediately
             });
+        });
+
+        addListener('verticalToggle', 'change', (e) => {
+            this.isVertical = e.target.checked;
+            this.createText();
         });
     }
 
@@ -712,15 +720,22 @@ class TextDance {
         }
     }
 
-    animate() {
-        this.clear();
+    animate(currentTime) {
+        if (!this.lastTime) {
+            this.lastTime = currentTime;
+        }
+        const deltaTime = (currentTime - this.lastTime) / 1000; // aac
+        this.lastTime = currentTime;
 
+        this.time += deltaTime;
+
+        this.updateEntranceProgress(deltaTime);
+        this.update();
+        this.clear();
         this.drawText();
-        this.time += 0.016; // 修正速度计算逻辑，时间应线性增长
-        this.updateEntranceProgress();
-        this.animationId = requestAnimationFrame(() => this.animate());
+
+        this.animationId = requestAnimationFrame(this.animate.bind(this));
     }
-    
 
     
     // 应用效果时重置出现动画
@@ -758,18 +773,50 @@ class TextDance {
         const t = this.time * this.speed;
         const centerX = this.canvas.width / 2;
         const centerY = this.canvas.height / 2;
-        const textWidth = this.chars.length * 50; // 估算文本宽度
+
+        // Set font for measurement
+        this.ctx.font = `bold ${this.fontSize}px ${this.fontFamily}`;
+
+        // Calculate base positions
+        let positions = [];
+        if (this.isVertical) {
+            const lineHeight = this.fontSize * 1.2;
+            const textHeight = this.chars.length * lineHeight;
+            const startY = centerY - textHeight / 2 + lineHeight / 2;
+            positions = this.chars.map((char, i) => ({
+                x: centerX,
+                y: startY + i * lineHeight
+            }));
+        } else {
+            const textWidth = this.ctx.measureText(this.text).width;
+            let currentX = centerX - textWidth / 2;
+            positions = this.chars.map(char => {
+                const charWidth = this.ctx.measureText(char.char).width;
+                const pos = {
+                    x: currentX + charWidth / 2,
+                    y: centerY
+                };
+                currentX += charWidth;
+                return pos;
+            });
+        }
 
         this.chars.forEach((char, i) => {
-            // 基础属性
-            char.x = centerX - textWidth / 2 + i * 50 + 25;
-            char.y = centerY;
+            // Assign base position
+            char.x = positions[i].x;
+            char.y = positions[i].y;
+            
+            // Reset properties
             char.a = 1;
             char.scale = 1;
 
-            // 应用效果
+            // Apply effects
             if (this.effects.has('wave')) {
-                char.y += Math.sin(t * 0.1 + i * 0.5) * 20;
+                if (this.isVertical) {
+                    char.x += Math.sin(t * 0.1 + i * 0.5) * 20; // Wave on X axis for vertical
+                } else {
+                    char.y += Math.sin(t * 0.1 + i * 0.5) * 20; // Wave on Y axis for horizontal
+                }
             }
             if (this.effects.has('rainbow')) {
                 const color = `hsl(${(t * 10 + i * 10) % 360}, 100%, 70%)`;
@@ -781,7 +828,7 @@ class TextDance {
                 }
             }
 
-            // 应用入场动画
+            // Apply entrance animations
             if (this.entranceProgress < 1) {
                 switch (this.entranceEffect) {
                     case 'fade-in':
@@ -791,37 +838,30 @@ class TextDance {
                         char.x -= (1 - this.entranceProgress) * 100;
                         char.a = this.entranceProgress;
                         break;
+                    case 'slide-in-right':
+                        char.x += (1 - this.entranceProgress) * 100;
+                        char.a = this.entranceProgress;
+                        break;
+                    case 'slide-in-top':
+                        char.y -= (1 - this.entranceProgress) * 100;
+                        char.a = this.entranceProgress;
+                        break;
+                    case 'slide-in-bottom':
+                        char.y += (1 - this.entranceProgress) * 100;
+                        char.a = this.entranceProgress;
+                        break;
                     case 'zoom-in':
                         char.scale = this.entranceProgress;
+                        char.a = this.entranceProgress;
+                        break;
+                    case 'zoom-out':
+                        char.scale = 1 + (1 - this.entranceProgress);
                         char.a = this.entranceProgress;
                         break;
                 }
             }
         });
     }
-
-    draw() {
-        // 清空画布，为绘制新的一帧做准备
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.save();
-
-        // 动画的核心逻辑（计算每个字符的位置、透明度、缩放等）
-        // 被封装在其他方法中（如 update），draw 函数只负责根据计算好的属性进行渲染。
-        this.chars.forEach(char => {
-            this.ctx.save();
-            this.ctx.font = `${char.fontSize}px '${char.fontFamily}'`;
-            this.ctx.fillStyle = `rgba(${char.r}, ${char.g}, ${char.b}, ${char.a})`;
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
-            this.ctx.translate(char.x, char.y);
-            this.ctx.scale(char.scale, char.scale);
-            this.ctx.fillText(char.char, 0, 0);
-            this.ctx.restore();
-        });
-
-        this.ctx.restore();
-    }
-
     async exportAsGif() {
         const statusEl = document.getElementById('saveStatus');
         const originalSpeed = this.speed;
