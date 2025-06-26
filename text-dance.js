@@ -1,7 +1,7 @@
 class TextDance {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
-        this.ctx = this.canvas.getContext('2d');
+        this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
         
                 const textInput = document.getElementById('textInput');
         this.text = textInput.value; // 从HTML中读取初始文本
@@ -772,7 +772,7 @@ class TextDance {
         // 更新动画进度
         if (this.entranceStartTime !== null) {
             const elapsed = (this.time - this.entranceStartTime) * this.speed;
-            this.entranceProgress = Math.min(elapsed / this.entranceDuration, 1);
+            this.entranceProgress = Math.min(elapsed / this.entranceEffectDuration, 1);
             if (this.entranceProgress === 1) {
                 this.entranceStartTime = null; // 动画完成后重置
             }
@@ -866,18 +866,18 @@ class TextDance {
     }
     async exportAsGif() {
         const statusEl = document.getElementById('saveStatus');
-        const originalSpeed = this.speed;
+
 
         // 为确保导出效果与预览一致，重置动画状态
         this.time = 0;
-        this.startEntranceAnimation();
+        this.entranceProgress = 0;
+        this.entranceStartTime = 0;
 
         let workerUrl = null;
-        // 在导出期间临时将速度设置为1，以便我们能精确控制时间。
         try {
             statusEl.textContent = '正在准备导出...';
 
-            const workerScriptContent = await fetch('gif.worker.js').then(res => {
+            const workerScriptContent = await fetch('https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js').then(res => {
                 if (!res.ok) throw new Error(`无法加载核心GIF脚本: ${res.statusText}`);
                 return res.text();
             });
@@ -886,7 +886,7 @@ class TextDance {
             workerUrl = URL.createObjectURL(workerBlob);
 
             statusEl.textContent = '正在生成GIF...';
-            
+
             const gif = new GIF({
                 workers: 2,
                 quality: 10,
@@ -898,18 +898,16 @@ class TextDance {
             });
 
             const FPS = 20;
-            const totalDuration = this.entranceEffectDuration + this.animationDuration;
+            const baseDuration = this.entranceEffectDuration + this.animationDuration;
+            const totalDuration = baseDuration / this.speed;
             const frames = Math.round(totalDuration * FPS);
             const delay = 1000 / FPS;
 
             for (let i = 0; i <= frames; i++) {
-                const deltaTime = (1 / FPS) * this.speed;
-                this.time += deltaTime;
+                this.time = i / FPS; // 模拟真实时间流逝 (秒), 确保速度只被应用一次
 
-                // 使用统一的逻辑更新和绘制
-                this.updateEntranceProgress(deltaTime);
-                this.update(); // Ensure continuous effects are updated
-                this.clear(true); // 使用透明背景
+                this.update();
+                this.clear(true);
                 this.drawText();
 
                 gif.addFrame(this.ctx, { copy: true, delay: delay });
@@ -917,7 +915,7 @@ class TextDance {
                 statusEl.textContent = `正在生成GIF... ${Math.round((i / frames) * 100)}%`;
                 await new Promise(resolve => requestAnimationFrame(resolve));
             }
-            
+
             gif.on('finished', (blob) => {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -932,14 +930,13 @@ class TextDance {
                     statusEl.textContent = 'GIF已保存！';
                 }, 100);
             });
-            
+
             gif.render();
-            
+
         } catch (error) {
             console.error('导出GIF失败:', error);
             statusEl.textContent = `保存失败: ${error.message}`;
         } finally {
-            this.speed = originalSpeed;
             if (workerUrl) {
                 URL.revokeObjectURL(workerUrl);
             }
