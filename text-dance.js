@@ -3,7 +3,7 @@ class TextDance {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
         
-        const textInput = document.getElementById('textInput');
+                const textInput = document.getElementById('textInput');
         this.text = textInput.value; // 从HTML中读取初始文本
 
         this.effects = new Set(['wave', 'rainbow']);
@@ -23,8 +23,6 @@ class TextDance {
         this.fontSizeSlider = document.getElementById('fontSizeSlider');
         this.fontSizeValue = document.getElementById('fontSizeValue');
         this.saveGifButton = document.getElementById('saveGif');
-        this.verticalToggle = document.getElementById('verticalToggle');
-        this.isVertical = this.verticalToggle ? this.verticalToggle.checked : false;
         console.log('In constructor, saveGifButton is:', this.saveGifButton);
         this.chars = [];
         
@@ -117,7 +115,7 @@ class TextDance {
         };
 
         setupSlider('speedControl', 'speedValue', 'speed', 'x');
-        setupSlider('entranceEffectDuration', 'entranceDurationValue', 'entranceEffectDuration', 's');
+        // setupSlider for 'entranceEffectDuration' was removed because the HTML element does not exist.
         setupSlider('animationDuration', 'animationDurationValue', 'animationDuration', 's');
 
         // Effect checkboxes
@@ -250,6 +248,11 @@ class TextDance {
     startEntranceAnimation() {
         this.entranceProgress = 0;
         this.entranceStartTime = performance.now();
+    }
+
+    resetAnimation() {
+        this.entranceProgress = 0;
+        this.lastTime = null; // Reset time to restart animations
     }
 
     // 更新出现动画进度
@@ -724,13 +727,18 @@ class TextDance {
         if (!this.lastTime) {
             this.lastTime = currentTime;
         }
-        const deltaTime = (currentTime - this.lastTime) / 1000; // aac
+        const deltaTime = (currentTime - this.lastTime) / 1000; // in seconds
         this.lastTime = currentTime;
 
         this.time += deltaTime;
 
-        this.updateEntranceProgress(deltaTime);
-        this.update();
+        this.updateEntranceProgress();
+
+        // 诊断代码：打印动画状态
+        if (this.entranceStartTime && this.entranceProgress < 1) {
+            console.log(`动画进度: ${this.entranceProgress.toFixed(2)}`);
+        }
+
         this.clear();
         this.drawText();
 
@@ -778,77 +786,50 @@ class TextDance {
         this.ctx.font = `bold ${this.fontSize}px ${this.fontFamily}`;
 
         // Calculate base positions
-        let positions = [];
-        if (this.isVertical) {
-            const lineHeight = this.fontSize * 1.2;
-            const textHeight = this.chars.length * lineHeight;
-            const startY = centerY - textHeight / 2 + lineHeight / 2;
-            positions = this.chars.map((char, i) => ({
-                x: centerX,
-                y: startY + i * lineHeight
-            }));
-        } else {
-            const textWidth = this.ctx.measureText(this.text).width;
-            let currentX = centerX - textWidth / 2;
-            positions = this.chars.map(char => {
-                const charWidth = this.ctx.measureText(char.char).width;
-                const pos = {
-                    x: currentX + charWidth / 2,
-                    y: centerY
-                };
-                currentX += charWidth;
-                return pos;
-            });
-        }
+        const textWidth = this.ctx.measureText(this.text).width;
+        let currentX = centerX - textWidth / 2;
+        const positions = this.chars.map(char => {
+            const charWidth = this.ctx.measureText(char.char).width;
+            const pos = {
+                x: currentX + charWidth / 2,
+                y: centerY
+            };
+            currentX += charWidth;
+            return pos;
+        });
 
         this.chars.forEach((char, i) => {
             // Assign base position
             char.x = positions[i].x;
             char.y = positions[i].y;
-            
-            // Reset properties
-            char.a = 1;
-            char.scale = 1;
 
-            // Apply effects
-            if (this.effects.has('wave')) {
-                if (this.isVertical) {
-                    char.x += Math.sin(t * 0.1 + i * 0.5) * 20; // Wave on X axis for vertical
-                } else {
-                    char.y += Math.sin(t * 0.1 + i * 0.5) * 20; // Wave on Y axis for horizontal
-                }
-            }
-            if (this.effects.has('rainbow')) {
-                const color = `hsl(${(t * 10 + i * 10) % 360}, 100%, 70%)`;
-                const rgb = color.match(/\d+/g);
-                if (rgb) {
-                    char.r = parseInt(rgb[0]);
-                    char.g = parseInt(rgb[1]);
-                    char.b = parseInt(rgb[2]);
-                }
-            }
-
-            // Apply entrance animations
-            if (this.entranceProgress < 1) {
+            // Apply entrance animations OR set default state
+            if (this.entranceProgress < 1 && this.entranceEffect !== 'none') {
+                // Entrance animation is active, calculate properties based on progress
                 switch (this.entranceEffect) {
                     case 'fade-in':
                         char.a = this.entranceProgress;
+                        char.scale = 1;
                         break;
                     case 'slide-in-left':
                         char.x -= (1 - this.entranceProgress) * 100;
                         char.a = this.entranceProgress;
+                        char.scale = 1;
                         break;
                     case 'slide-in-right':
                         char.x += (1 - this.entranceProgress) * 100;
                         char.a = this.entranceProgress;
+                        char.scale = 1;
                         break;
                     case 'slide-in-top':
                         char.y -= (1 - this.entranceProgress) * 100;
                         char.a = this.entranceProgress;
+                        char.scale = 1;
                         break;
                     case 'slide-in-bottom':
                         char.y += (1 - this.entranceProgress) * 100;
                         char.a = this.entranceProgress;
+                        char.scale = 1;
                         break;
                     case 'zoom-in':
                         char.scale = this.entranceProgress;
@@ -858,6 +839,27 @@ class TextDance {
                         char.scale = 1 + (1 - this.entranceProgress);
                         char.a = this.entranceProgress;
                         break;
+                    default:
+                        char.a = 1;
+                        char.scale = 1;
+                }
+            } else {
+                // No entrance animation, set default state
+                char.a = 1;
+                char.scale = 1;
+            }
+
+            // Apply continuous effects (wave, rainbow, etc.)
+            if (this.effects.has('wave')) {
+                char.y += Math.sin(t * 0.1 + i * 0.5) * 20;
+            }
+            if (this.effects.has('rainbow')) {
+                const color = `hsl(${(t * 10 + i * 10) % 360}, 100%, 70%)`;
+                const rgb = color.match(/\d+/g);
+                if (rgb) {
+                    char.r = parseInt(rgb[0]);
+                    char.g = parseInt(rgb[1]);
+                    char.b = parseInt(rgb[2]);
                 }
             }
         });
@@ -901,11 +903,12 @@ class TextDance {
             const delay = 1000 / FPS;
 
             for (let i = 0; i <= frames; i++) {
-                // 更新时间，确保动画平滑进行
-                this.time = (i / FPS);
+                const deltaTime = (1 / FPS) * this.speed;
+                this.time += deltaTime;
 
                 // 使用统一的逻辑更新和绘制
-                this.updateEntranceProgress();
+                this.updateEntranceProgress(deltaTime);
+                this.update(); // Ensure continuous effects are updated
                 this.clear(true); // 使用透明背景
                 this.drawText();
 
